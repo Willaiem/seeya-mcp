@@ -1,0 +1,12 @@
+{
+  "name": "seeya-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server that delegates image analysis to a vision-capable model.",
+  "main": "index.mjs",
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
