@@ -1,12 +1,34 @@
 {
   "name": "seeya-mcp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "MCP server that delegates image analysis to a vision-capable model.",
-  "main": "index.mjs",
+  "description": "MCP vision server with selectable Google, Anthropic, and opencode backends.",
+  "main": "dist/index.mjs",
+  "bin": "dist/index.mjs",
+  "files": ["dist"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
+    "test": "vitest run"
+  },
   "dependencies": {
-    "@google/genai": "^1.0.0",
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@anthropic-ai/sdk": "^0.105.0",
+    "@google/genai": "^1.52.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@opencode-ai/sdk": "^1.17.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.0",
+    "@types/node": "^26.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.6"
   }
 }
