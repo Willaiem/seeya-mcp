@@ -18,6 +18,15 @@ vi.mock("@opencode-ai/sdk", () => ({
   }),
 }));
 
+// Keep these backend tests hermetic: no real subprocess spawn. The resolver's own
+// behavior (override vs. managed spawn) is covered in opencode-server.test.ts.
+vi.mock("./opencode-server.js", () => ({
+  resolveOpencodeBaseUrl: vi.fn(
+    async () => process.env.OPENCODE_BASE_URL?.trim() || "http://127.0.0.1:4096",
+  ),
+  usingManagedServer: vi.fn(() => !process.env.OPENCODE_BASE_URL?.trim()),
+}));
+
 import { OpencodeBackend } from "./opencode.js";
 
 const PARSED = {

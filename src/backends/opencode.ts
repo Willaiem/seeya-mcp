@@ -9,9 +9,8 @@ import {
 import type { LoadedImage } from "../image.js";
 import type { ParsedModelId } from "../models.js";
 import { OPENCODE_GO_VISION_MODELS } from "../models.js";
+import { resolveOpencodeBaseUrl, usingManagedServer } from "./opencode-server.js";
 import type { Backend, ValidationResult } from "./types.js";
-
-const DEFAULT_BASE_URL = "http://127.0.0.1:4096";
 
 interface ProviderListModel {
   attachment?: boolean;
@@ -30,29 +29,24 @@ interface ProviderListData {
 export class OpencodeBackend implements Backend {
   readonly name = "opencode" as const;
 
-  private baseUrl(): string {
-    return process.env.OPENCODE_BASE_URL ?? DEFAULT_BASE_URL;
-  }
-
-  private connect(): OpencodeClient {
-    return createOpencodeClient({ baseUrl: this.baseUrl() });
+  private async connect(): Promise<{ client: OpencodeClient; baseUrl: string }> {
+    const baseUrl = await resolveOpencodeBaseUrl();
+    return { client: createOpencodeClient({ baseUrl }), baseUrl };
   }
 
   async analyze(model: ParsedModelId, image: LoadedImage, prompt: string): Promise<string> {
-    const client = this.connect();
-    const created = await this.call(() => client.session.create());
+    const { client, baseUrl } = await this.connect();
+    const created = await this.call(baseUrl, () => client.session.create());
     const sessionId = created?.id;
     if (!sessionId) {
-      throw new Error(
-        `opencode backend: could not create a session at ${this.baseUrl()}. Is opencode running? Set OPENCODE_BASE_URL if it is on another port.`,
-      );
+      throw new Error(`opencode backend: could not create a session. ${reachHint(baseUrl)}`);
     }
     try {
       const parts: Array<TextPartInput | FilePartInput> = [
         { type: "text", text: prompt },
         { type: "file", mime: image.mimeType, url: image.dataUrl },
       ];
-      const result = await this.call(() =>
+      const result = await this.call(baseUrl, () =>
         client.session.prompt({
           path: { id: sessionId },
           body: {
@@ -108,7 +102,7 @@ export class OpencodeBackend implements Backend {
     if (!data) {
       return {
         valid: false,
-        reason: `Could not reach opencode at ${this.baseUrl()} to validate "${model.providerID}/${model.modelID}". Is opencode running? Set OPENCODE_BASE_URL if it is on another port.`,
+        reason: `Could not reach opencode to validate "${model.providerID}/${model.modelID}". ${unreachableDetail()}`,
       };
     }
     const provider = (data.all ?? []).find((p) => p.id === model.providerID);
@@ -143,8 +137,8 @@ export class OpencodeBackend implements Backend {
   }
 
   private async safeProviderList(): Promise<ProviderListData | null> {
-    const client = this.connect();
     try {
+      const { client } = await this.connect();
       const res = await client.provider.list();
       if (res.error || !res.data) {
         return null;
@@ -155,12 +149,15 @@ export class OpencodeBackend implements Backend {
     }
   }
 
-  private async call<T>(fn: () => Promise<{ data: T | undefined; error: unknown }>): Promise<T> {
+  private async call<T>(
+    baseUrl: string,
+    fn: () => Promise<{ data: T | undefined; error: unknown }>,
+  ): Promise<T> {
     try {
       const res = await fn();
       if (res.error || res.data === undefined) {
         throw new Error(
-          `opencode backend call failed at ${this.baseUrl()}: ${JSON.stringify(res.error) ?? "no data"}`,
+          `opencode backend call failed at ${baseUrl}: ${JSON.stringify(res.error) ?? "no data"}`,
         );
       }
       return res.data;
@@ -168,11 +165,21 @@ export class OpencodeBackend implements Backend {
       if (err instanceof Error && err.message.startsWith("opencode backend call failed")) {
         throw err;
       }
-      throw new Error(
-        `opencode backend: could not reach opencode at ${this.baseUrl()}. Is opencode running? Set OPENCODE_BASE_URL if it is on another port. (${errText(err)})`,
-      );
+      throw new Error(`opencode backend: ${reachHint(baseUrl)} (${errText(err)})`);
     }
   }
+}
+
+function reachHint(baseUrl: string): string {
+  return usingManagedServer()
+    ? `Could not reach the managed opencode server at ${baseUrl} (started via the \`opencode\` CLI).`
+    : `Could not reach opencode at ${baseUrl}. Is opencode running? Set OPENCODE_BASE_URL if it is on another port.`;
+}
+
+function unreachableDetail(): string {
+  return usingManagedServer()
+    ? "Could not start a local opencode server; ensure the `opencode` CLI is installed and on PATH, or set OPENCODE_BASE_URL to point at a running server."
+    : "Is opencode running at OPENCODE_BASE_URL?";
 }
 
 function errText(err: unknown): string {

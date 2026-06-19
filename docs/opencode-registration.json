@@ -1,5 +1,5 @@
 {
-  "$comment": "Register seeya-mcp as a local MCP server in opencode.json. Adjust `cwd` to this repo's absolute path. Only the backends you use need their key; the server starts without any keys and reports a missing key only when you select a backend that needs it.",
+  "$comment": "Register seeya-mcp as a local MCP server in opencode.json. Adjust `cwd` to this repo's absolute path. Only the backends you use need their key; the server starts without any keys and reports a missing key only when you select a backend that needs it. Do NOT set OPENCODE_BASE_URL unless you run your own `opencode serve` on a known port -- by default the opencode backend spawns its own server, so it does not need the TUI's (random, undiscoverable) port. See the README 'opencode connectivity' section.",
   "mcp": {
     "seeya-mcp": {
       "type": "local",
@@ -8,7 +8,6 @@
       "environment": {
         "GEMINI_API_KEY": "{env:GEMINI_API_KEY}",
         "ANTHROPIC_API_KEY": "{env:ANTHROPIC_API_KEY}",
-        "OPENCODE_BASE_URL": "http://127.0.0.1:4096",
         "SEEYA_MCP_DEFAULT_MODEL": "{env:SEEYA_MCP_DEFAULT_MODEL}"
       }
     }
