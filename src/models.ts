@@ -3,19 +3,34 @@ export type BackendName = "google" | "anthropic" | "opencode";
 export const DEFAULT_MODEL = "google/gemini-2.5-flash";
 
 export const GOOGLE_VISION_MODELS = [
-  "gemini-2.5-flash",
+  "gemini-3.5-flash",
+  "gemini-3.1-pro-preview",
+  "gemini-3.1-flash-lite",
+  "gemini-3-pro",
+  "gemini-3-flash",
+  "gemini-3-flash-lite",
   "gemini-2.5-pro",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-pro",
   "gemini-2.0-flash",
   "gemini-2.0-flash-lite",
 ] as const;
 
 export const ANTHROPIC_VISION_MODELS = [
+  "claude-fable-5",
+  "claude-opus-4-8",
+  "claude-sonnet-4-6",
+  "claude-haiku-4-5",
+  "claude-haiku-4-5-20251001",
+  "claude-opus-4-7",
+  "claude-opus-4-6",
   "claude-sonnet-4-5",
   "claude-sonnet-4-5-20250929",
+  "claude-opus-4-5",
+  "claude-opus-4-5-20251101",
   "claude-opus-4-1",
   "claude-opus-4-1-20250805",
-  "claude-3-7-sonnet-20250219",
-  "claude-3-5-sonnet-20241022",
 ] as const;
 
 export const OPENCODE_GO_VISION_MODELS = [

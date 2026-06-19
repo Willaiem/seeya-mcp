@@ -46,7 +46,7 @@ function mockDeps(overrides: Partial<ServerDeps> = {}): ServerDeps & {
       async () =>
         ({ dataUrl: "data:image/png;base64,AAAA", mimeType: "image/png", bytes: 3 }) as LoadedImage,
     ),
-    listAllModels: vi.fn(async () => ["google/gemini-2.5-flash", "anthropic/claude-sonnet-4-5"]),
+    listAllModels: vi.fn(async () => ["google/gemini-2.5-flash", "anthropic/claude-sonnet-4-6"]),
   };
   return { ...base, ...overrides, backend, parsed };
 }
@@ -90,11 +90,11 @@ describe("handleToolCall — analyze_image", () => {
     const deps = mockDeps();
     const result = await handleToolCall(
       "analyze_image",
-      { image: "/tmp/x.png", model: "anthropic/claude-sonnet-4-5" },
+      { image: "/tmp/x.png", model: "anthropic/claude-sonnet-4-6" },
       deps,
     );
     expect(result.isError).toBeUndefined();
-    expect(deps.route).toHaveBeenCalledWith("anthropic/claude-sonnet-4-5");
+    expect(deps.route).toHaveBeenCalledWith("anthropic/claude-sonnet-4-6");
     expect(deps.getConfig).not.toHaveBeenCalled();
   });
 
@@ -233,11 +233,11 @@ describe("handleToolCall — get_vision_model", () => {
 describe("handleToolCall — list_vision_models", () => {
   it("returns the aggregated model list, one per line", async () => {
     const deps = mockDeps({
-      listAllModels: vi.fn(async () => ["anthropic/claude-sonnet-4-5", "google/gemini-2.5-flash"]),
+      listAllModels: vi.fn(async () => ["anthropic/claude-sonnet-4-6", "google/gemini-2.5-flash"]),
     });
     const result = await handleToolCall("list_vision_models", {}, deps);
     expect(result.isError).toBeUndefined();
-    expect(unwrap(result).text).toBe("anthropic/claude-sonnet-4-5\ngoogle/gemini-2.5-flash");
+    expect(unwrap(result).text).toBe("anthropic/claude-sonnet-4-6\ngoogle/gemini-2.5-flash");
   });
 
   it("reports an empty list gracefully", async () => {

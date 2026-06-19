@@ -72,13 +72,16 @@ describe("parseModelId", () => {
 describe("isVisionModelByAllowlist", () => {
   it("accepts allowlisted models", () => {
     expect(isVisionModelByAllowlist("google/gemini-2.5-flash")).toBe(true);
-    expect(isVisionModelByAllowlist("anthropic/claude-sonnet-4-5")).toBe(true);
+    expect(isVisionModelByAllowlist("google/gemini-3.1-pro-preview")).toBe(true);
+    expect(isVisionModelByAllowlist("google/gemini-3.5-flash")).toBe(true);
+    expect(isVisionModelByAllowlist("anthropic/claude-sonnet-4-6")).toBe(true);
+    expect(isVisionModelByAllowlist("anthropic/claude-fable-5")).toBe(true);
     expect(isVisionModelByAllowlist("opencode-go/kimi-k2.7-code")).toBe(true);
   });
 
   it("rejects non-allowlisted models", () => {
     expect(isVisionModelByAllowlist("google/gemini-1.0")).toBe(false);
-    expect(isVisionModelByAllowlist("anthropic/claude-3-haiku-20240307")).toBe(false);
+    expect(isVisionModelByAllowlist("anthropic/claude-3-5-sonnet-20241022")).toBe(false);
     expect(isVisionModelByAllowlist("opencode-go/glm-5.2")).toBe(false);
   });
 
@@ -92,7 +95,9 @@ describe("listVisionModels", () => {
   it("returns the union of google, anthropic, and opencode-go tested sets", () => {
     const all = listVisionModels();
     expect(all).toContain("google/gemini-2.5-flash");
-    expect(all).toContain("anthropic/claude-sonnet-4-5");
+    expect(all).toContain("google/gemini-3.5-flash");
+    expect(all).toContain("anthropic/claude-sonnet-4-6");
+    expect(all).toContain("anthropic/claude-fable-5");
     expect(all).toContain("opencode-go/kimi-k2.7-code");
     expect(all).toHaveLength(
       GOOGLE_VISION_MODELS.length +

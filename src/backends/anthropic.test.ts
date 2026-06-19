@@ -12,7 +12,7 @@ import { AnthropicBackend } from "./anthropic.js";
 
 const PARSED = {
   providerID: "anthropic",
-  modelID: "claude-sonnet-4-5",
+  modelID: "claude-sonnet-4-6",
   backend: "anthropic",
 } as const;
 const PNG_IMAGE = { dataUrl: "data:image/png;base64,AAAA", mimeType: "image/png", bytes: 3 };
@@ -29,7 +29,8 @@ afterEach(() => {
 describe("AnthropicBackend.listModels", () => {
   it("returns the anthropic allowlist prefixed with anthropic/", async () => {
     const models = await new AnthropicBackend().listModels();
-    expect(models).toContain("anthropic/claude-sonnet-4-5");
+    expect(models).toContain("anthropic/claude-sonnet-4-6");
+    expect(models).toContain("anthropic/claude-fable-5");
     expect(models.every((m) => m.startsWith("anthropic/"))).toBe(true);
   });
 });
@@ -62,7 +63,7 @@ describe("AnthropicBackend.analyze", () => {
       max_tokens: number;
       messages: { role: string; content: unknown[] }[];
     };
-    expect(params.model).toBe("claude-sonnet-4-5");
+    expect(params.model).toBe("claude-sonnet-4-6");
     expect(params.max_tokens).toBeGreaterThan(0);
     expect(params.messages[0]?.content).toEqual([
       { type: "image", source: { type: "base64", media_type: "image/png", data: "AAAA" } },
