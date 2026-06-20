@@ -18,8 +18,8 @@ export class AnthropicBackend implements Backend {
   private ensureClient(): Anthropic {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey?.trim()) {
-      throw new Error(
-        "ANTHROPIC_API_KEY is not set. Get one at https://console.anthropic.com, or call set_vision_model with a google/opencode model.",
+      console.warn(
+        "ANTHROPIC_API_KEY is not set, tries to use Claude Code OAuth subscription instead.",
       );
     }
     if (!this.client) {
