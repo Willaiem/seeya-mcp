@@ -46,7 +46,7 @@ export const defaultDeps: ServerDeps = {
 
 export function createServer(deps: ServerDeps = defaultDeps): Server {
   const server = new Server(
-    { name: "seeya-mcp", version: "0.1.0" },
+    { name: "seeya-mcp", version: "0.1.1" },
     { capabilities: { tools: {} } },
   );
 
