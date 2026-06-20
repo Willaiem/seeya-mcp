@@ -69,7 +69,8 @@ Notes:
 
 ```sh
 npm i
-npm run dev
+npm run build
+npx @modelcontextprotocol/inspector node dist/index.mjs 
 ```
 
 ## Requirements
