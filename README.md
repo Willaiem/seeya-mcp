@@ -18,12 +18,16 @@ Add the following to your MCP client config:
 {
   "mcpServers": {
     "seeya": {
-      "command": "npx",
-      "args": ["-y", "seeya-mcp@latest"],
+      "type": "local",
+      "command": [
+          "npx",
+          "-y",
+          "seeya-mcp@latest"
+      ],
       "env": {
         "GEMINI_API_KEY": "your-google-ai-studio-key",
         "ANTHROPIC_API_KEY": "your Anthropic API key, but if you want to use OAuth from Claude Code instead then skip it"
-      }
+      },
     }
   }
 }
@@ -69,8 +73,7 @@ Notes:
 
 ```sh
 npm i
-npm run build
-npx @modelcontextprotocol/inspector node dist/index.mjs 
+npm run dev
 ```
 
 ## Requirements

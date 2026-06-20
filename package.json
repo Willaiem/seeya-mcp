@@ -37,6 +37,7 @@
     "access": "public"
   },
   "scripts": {
+    "dev": "npm run build && npx @modelcontextprotocol/inspector node dist/index.mjs",
     "build": "tsup",
     "start": "node dist/index.mjs",
     "typecheck": "tsc --noEmit",
