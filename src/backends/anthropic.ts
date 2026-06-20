@@ -3,6 +3,7 @@ import type { LoadedImage } from "../image.js";
 import { base64FromDataUrl } from "../image.js";
 import type { ParsedModelId } from "../models.js";
 import { ANTHROPIC_VISION_MODELS } from "../models.js";
+import { analyzeWithClaudeCli } from "./claude-cli.js";
 import type { Backend, ValidationResult } from "./types.js";
 
 const SUPPORTED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
@@ -15,13 +16,7 @@ export class AnthropicBackend implements Backend {
 
   private client: Anthropic | null = null;
 
-  private ensureClient(): Anthropic {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey?.trim()) {
-      console.warn(
-        "ANTHROPIC_API_KEY is not set, tries to use Claude Code OAuth subscription instead.",
-      );
-    }
+  private ensureClient(apiKey: string): Anthropic {
     if (!this.client) {
       this.client = new Anthropic({ apiKey });
     }
@@ -32,7 +27,13 @@ export class AnthropicBackend implements Backend {
     if (!SUPPORTED_MIME_TYPES.includes(image.mimeType as SupportedMime)) {
       throw new Error(`Anthropic supports jpeg/png/gif/webp images; received ${image.mimeType}.`);
     }
-    const client = this.ensureClient();
+    const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
+    // No API key: fall back to the local Claude Code CLI so consumers can use
+    // their Claude Code subscription (`claude -p`) instead of an API key.
+    if (!apiKey) {
+      return analyzeWithClaudeCli(model, image, prompt);
+    }
+    const client = this.ensureClient(apiKey);
     const message = await client.messages.create({
       model: model.modelID,
       max_tokens: MAX_OUTPUT_TOKENS,

@@ -1,11 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ create: vi.fn() }));
+const mocks = vi.hoisted(() => ({ create: vi.fn(), analyzeWithClaudeCli: vi.fn() }));
 
 vi.mock("@anthropic-ai/sdk", () => ({
   default: class {
     messages = { create: mocks.create };
   },
+}));
+
+vi.mock("./claude-cli.js", () => ({
+  analyzeWithClaudeCli: mocks.analyzeWithClaudeCli,
 }));
 
 import { AnthropicBackend } from "./anthropic.js";
@@ -19,6 +23,7 @@ const PNG_IMAGE = { dataUrl: "data:image/png;base64,AAAA", mimeType: "image/png"
 
 beforeEach(() => {
   mocks.create.mockReset();
+  mocks.analyzeWithClaudeCli.mockReset();
   process.env.ANTHROPIC_API_KEY = "test-key";
 });
 
@@ -88,10 +93,24 @@ describe("AnthropicBackend.analyze", () => {
     expect(mocks.create).not.toHaveBeenCalled();
   });
 
-  it("throws a clear error when ANTHROPIC_API_KEY is missing", async () => {
+  it("falls back to the Claude Code CLI when ANTHROPIC_API_KEY is missing", async () => {
     delete process.env.ANTHROPIC_API_KEY;
-    await expect(new AnthropicBackend().analyze(PARSED, PNG_IMAGE, "describe")).rejects.toThrow(
-      /ANTHROPIC_API_KEY/,
-    );
+    mocks.analyzeWithClaudeCli.mockResolvedValue("from cli");
+    const out = await new AnthropicBackend().analyze(PARSED, PNG_IMAGE, "describe");
+    expect(out).toBe("from cli");
+    expect(mocks.analyzeWithClaudeCli).toHaveBeenCalledWith(PARSED, PNG_IMAGE, "describe");
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it("still rejects an unsupported mime type without an API key", async () => {
+    delete process.env.ANTHROPIC_API_KEY;
+    await expect(
+      new AnthropicBackend().analyze(
+        PARSED,
+        { dataUrl: "data:image/bmp;base64,AAAA", mimeType: "image/bmp", bytes: 3 },
+        "describe",
+      ),
+    ).rejects.toThrow(/jpeg\/png\/gif\/webp/);
+    expect(mocks.analyzeWithClaudeCli).not.toHaveBeenCalled();
   });
 });
