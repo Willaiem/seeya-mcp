@@ -1,14 +1,40 @@
 {
   "name": "seeya-mcp",
-  "version": "2.0.0",
-  "private": true,
+  "version": "0.1.0",
   "type": "module",
   "description": "MCP vision server with selectable Google, Anthropic, and opencode backends.",
+  "license": "MIT",
+  "author": "Willaiem",
+  "homepage": "https://github.com/Willaiem/seeya-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Willaiem/seeya-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Willaiem/seeya-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vision",
+    "image-analysis",
+    "anthropic",
+    "claude",
+    "google",
+    "gemini",
+    "opencode",
+    "ai"
+  ],
   "main": "dist/index.mjs",
-  "bin": "dist/index.mjs",
+  "bin": {
+    "seeya-mcp": "dist/index.mjs"
+  },
   "files": ["dist"],
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsup",
@@ -16,7 +42,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
